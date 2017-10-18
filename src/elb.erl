@@ -149,8 +149,8 @@ init(Args) ->
 
     Worker = proplists:get_value('worker', Args),
     WorkerArgs = proplists:get_value('worker_args', Args, []),
-    Size = proplists:get_value('size', Args, 1),
-    Restart = proplists:get_value('restart', Args, 'true'),
+    Size = proplists:get_value('size', Args, 0),
+    Restart = proplists:get_value('restart', Args, 'false'),
 
     CreateWorker = fun() -> start_worker(Worker, WorkerArgs) end,
     Workers = [CreateWorker() || _ <- lists:seq(1, Size)],
@@ -194,6 +194,9 @@ handle_cast({'broadcast', Message}, #state{workers=Workers}=State) ->
 handle_cast(_Msg, State) ->
     {'noreply', State}.
 
+handle_info({'EXIT', Pid, 'normal'}, #state{workers=Tail}=State) ->
+    Workers = lists:delete(Pid, Tail),
+    {'noreply', State#state{workers=Workers}};
 handle_info({'EXIT', Pid, _Reason}, #state{restart='true'
                                           ,worker=Mod
                                           ,worker_args=WorkerArgs
@@ -202,9 +205,6 @@ handle_info({'EXIT', Pid, _Reason}, #state{restart='true'
     Workers = append(lists:delete(Pid, Tail), Worker),
     {'noreply', State#state{workers=Workers}};
 handle_info({'EXIT', Pid, _Reason}, #state{workers=Tail}=State) ->
-    Workers = lists:delete(Pid, Tail),
-    {'noreply', State#state{workers=Workers}};
-handle_info({'EXIT', Pid, 'normal'}, #state{workers=Tail}=State) ->
     Workers = lists:delete(Pid, Tail),
     {'noreply', State#state{workers=Workers}};
 handle_info(_Msg, State) ->

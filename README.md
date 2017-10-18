@@ -1,1 +1,130 @@
 # Erlang Load Balancer [![CircleCI](https://circleci.com/gh/macpie/elb.svg?style=svg)](https://circleci.com/gh/macpie/elb)
+
+## Usage
+
+Start using `elb:start(Options)` or `elb:start_link(Options)`
+
+### Options
+
+```Erlang
+[
+    {'worker', {Module, Function}} % Or {worker, Module}. Default to start_link function
+    ,{'worker_args', []} % Arguments to pass to worker. Default to []
+    ,{'size', 10} % Number of worker to start. Default to 0
+    ,{'restart', true} % Auto restart dead worker. Default to false
+]
+```
+
+
+## Examples
+
+### [EDOC](https://macpie.github.io/elb/)
+
+### Simple Subscribe
+
+```Erlang
+1> l(elb).
+{module,elb}
+
+2> {ok, P} elb:start_link([{'size', 0}]).
+{ok,<0.382.0>}
+
+3> elb:subscribe(P).
+ok
+
+4> elb:cast(P, 'test').
+ok
+
+5> flush().
+Shell got test
+ok
+```
+
+### Simple Gen Server
+
+```Erlang
+{'ok',ELB} = elb:start([
+    {'worker', {'worker_test', 'start_link'}}
+    ,{'worker_args', []}
+    ,{'size', 10}
+    ,{'restart', 'true'}
+]),
+
+'ok' = elb:cast(ELB, "ASYNC Message"),
+'ok' = elb:broadcast(ELB, "Broadcast Message to all workers"),
+"Sync Message" = elb:call(ELB, "Sync Message"),
+```
+
+```Erlang
+-module(worker_test).
+
+%% ------------------------------------------------------------------
+%% API Function Exports
+%% ------------------------------------------------------------------
+-export([
+    start_link/0, start_link/1
+]).
+
+%% ------------------------------------------------------------------
+%% gen_server Function Exports
+%% ------------------------------------------------------------------
+-export([
+    init/1
+    ,handle_call/3
+    ,handle_cast/2
+    ,handle_info/2
+    ,terminate/2
+    ,code_change/3
+]).
+
+-define(SERVER, ?MODULE).
+
+-record(state, {}).
+
+%% ------------------------------------------------------------------
+%% API Function Definitions
+%% ------------------------------------------------------------------
+start_link() ->
+    start_link([]).
+
+start_link(Args) ->
+    gen_server:start_link(?SERVER, Args, []).
+
+%% ------------------------------------------------------------------
+%% gen_server Function Definitions
+%% ------------------------------------------------------------------
+init(_Args) ->
+    {'ok', #state{}}.
+
+handle_call(_Msg, _From, State) ->
+    {'reply', 'ok', State}.
+
+handle_cast(_Msg, State) ->
+    {'noreply', State}.
+
+handle_info({Message, From}, State) ->
+    elb:reply(From, Message),
+    {'noreply', State};
+handle_info(_Msg, State) ->
+    {'noreply', State}.
+
+code_change(_OldVsn, State, _Extra) ->
+    {'ok', State}.
+
+terminate(_Reason, _State) ->
+    'ok'.
+
+%% ------------------------------------------------------------------
+%% Internal Function Definitions
+%% ------------------------------------------------------------------
+
+```
+
+## Build
+
+Built using [Rebar3](http://www.rebar3.org) / Erlang 19.3
+
+
+## Test
+
+`rebar3 ct -v`
