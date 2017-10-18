@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  test:
+  build:
     docker:
       - image: erlang:19
     steps:
@@ -8,6 +8,17 @@ jobs:
       - run:
           name: Compile
           command: rebar3 compile
+  test:
+    docker:
+      - image: erlang:19
+    steps:
+      - checkout
       - run:
           name: Common Tests
           command: rebar3 ct -v
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - test
