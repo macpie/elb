@@ -11,8 +11,6 @@ jobs:
   test:
     docker:
       - image: erlang:19
-    requires:
-        - build
     steps:
       - checkout
       - run:
@@ -24,3 +22,5 @@ workflows:
     jobs:
       - build
       - test
+        requires:
+            - build
