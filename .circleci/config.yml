@@ -11,6 +11,8 @@ jobs:
   test:
     docker:
       - image: erlang:19
+    requires:
+        - build
     steps:
       - checkout
       - run:
