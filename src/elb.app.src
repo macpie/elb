@@ -1,0 +1,14 @@
+{application, elb,
+ [{description, "Simple load balancer"},
+  {vsn, "1.0.0"},
+  {registered, []},
+  {applications,
+   [kernel,
+    stdlib
+   ]},
+  {env,[]},
+  {modules, ['elb']},
+  {maintainers, []},
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+]}.
