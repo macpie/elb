@@ -1,0 +1,13 @@
+version: 2
+jobs:
+  test:
+    docker:
+      - image: erlang:19
+    steps:
+      - checkout
+      - run:
+          name: Compile
+          command: rebar3 compile
+      - run:
+          name: Common Tests
+          command: rebar3 ct -v
