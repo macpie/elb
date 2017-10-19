@@ -6,9 +6,17 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Compile
+          name: Dialyzer
           command: rebar3 compile
-  test:
+  dialyzer:
+    docker:
+      - image: erlang:19
+    steps:
+      - checkout
+      - run:
+          name: Dialyzer
+          command: rebar3 dialyzer
+  ct:
     docker:
       - image: erlang:19
     steps:
@@ -16,9 +24,18 @@ jobs:
       - run:
           name: Common Tests
           command: rebar3 ct -v
+  eunit:
+    docker:
+      - image: erlang:19
+    steps:
+      - checkout
+      - run:
+          name: Eunit
+          command: rebar3 eunit
 workflows:
   version: 2
-  build_and_test:
+  tests:
     jobs:
-      - build
-      - test
+      - dialyzer
+      - ct
+      - eunit
