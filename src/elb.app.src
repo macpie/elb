@@ -1,14 +1,19 @@
-{application, elb,
- [{description, "Simple load balancer"},
-  {vsn, "1.0.0"},
-  {registered, []},
-  {applications,
-   [kernel,
-    stdlib
-   ]},
-  {env,[]},
-  {modules, ['elb']},
-  {maintainers, ["macpie"]},
-  {licenses, ["Apache 2.0"]},
-  {links, [{"Github", "https://github.com/macpie/elb"}]}
+{application, elb, [
+    {description, "Simple load balancer"},
+    {vsn, "1.0.0"},
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib
+    ]},
+    {env,[]},
+    {modules, ['elb']},
+    {maintainers, ["macpie"]},
+    {licenses, ["Apache 2.0"]},
+    {links, [
+        {"Github", "https://github.com/macpie/elb"},
+        {"EDoc", "https://macpie.github.io/elb/"},
+        {"Wiki", "https://github.com/macpie/elb/wiki"},
+        {"Issues", "https://github.com/macpie/elb/issues"}
+    ]}
 ]}.

@@ -1,5 +1,7 @@
 # Erlang Load Balancer [![CircleCI](https://circleci.com/gh/macpie/elb.svg?style=svg)](https://circleci.com/gh/macpie/elb)
 
+Simple message load balancer using round robin style.
+
 ## Usage
 
 Start using `elb:start(Options)` or `elb:start_link(Options)`
@@ -15,10 +17,10 @@ Start using `elb:start(Options)` or `elb:start_link(Options)`
 ]
 ```
 
+## [WIKI](https://github.com/macpie/elb/wiki)
+## [EDOC](https://macpie.github.io/elb/)
 
 ## Examples
-
-### [EDOC](https://macpie.github.io/elb/)
 
 ### Simple Subscribe
 
@@ -26,8 +28,8 @@ Start using `elb:start(Options)` or `elb:start_link(Options)`
 1> l(elb).
 {module,elb}
 
-2> {ok, P} elb:start_link([{'size', 0}]).
-{ok,<0.382.0>}
+2> {'ok', P} = elb:start_link([{'size', 0}]).
+{ok,<0.666.0>}
 
 3> elb:subscribe(P).
 ok
@@ -122,7 +124,9 @@ terminate(_Reason, _State) ->
 
 ## Build
 
-Built using [Rebar3](http://www.rebar3.org) / Erlang 19.3
+Built using [Rebar3](http://www.rebar3.org) / Erlang 19.3.
+
+Available on [Hex.pm](https://hex.pm/packages/elb)
 
 
 ## Test
