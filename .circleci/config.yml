@@ -6,9 +6,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Dialyzer
+          name: Builder
           command: rebar3 compile
-  dialyzer:
+  dialyzer19:
     docker:
       - image: erlang:19
     steps:
@@ -16,7 +16,15 @@ jobs:
       - run:
           name: Dialyzer
           command: rebar3 dialyzer
-  ct:
+  dialyzer20:
+    docker:
+      - image: erlang:20
+    steps:
+      - checkout
+      - run:
+          name: Dialyzer
+          command: rebar3 dialyzer
+  ct19:
     docker:
       - image: erlang:19
     steps:
@@ -24,7 +32,15 @@ jobs:
       - run:
           name: Common Tests
           command: rebar3 ct -v
-  eunit:
+  ct20:
+    docker:
+      - image: erlang:20
+    steps:
+      - checkout
+      - run:
+          name: Common Tests
+          command: rebar3 ct -v
+  eunit19:
     docker:
       - image: erlang:19
     steps:
@@ -32,9 +48,25 @@ jobs:
       - run:
           name: Eunit
           command: rebar3 eunit
-  xref:
+  eunit20:
+    docker:
+      - image: erlang:20
+    steps:
+      - checkout
+      - run:
+          name: Eunit
+          command: rebar3 eunit
+  xref19:
     docker:
       - image: erlang:19
+    steps:
+      - checkout
+      - run:
+          name: Xref
+          command: rebar3 xref
+  xref20:
+    docker:
+      - image: erlang:20
     steps:
       - checkout
       - run:
@@ -44,7 +76,11 @@ workflows:
   version: 2
   tests:
     jobs:
-      - dialyzer
-      - ct
-      - eunit
-      - xref
+      - dialyzer19
+      - ct19
+      - eunit19
+      - xref19
+      - dialyzer20
+      - ct20
+      - eunit20
+      - xref20

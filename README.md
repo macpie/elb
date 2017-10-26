@@ -127,8 +127,18 @@ terminate(_Reason, _State) ->
 
 ## Build
 
-Built using [Rebar3](http://www.rebar3.org) / Erlang 19.3.
+[Rebar3](http://www.rebar3.org)
 
 ## Test
 
 `rebar3 ct -v`
+
+### Tested via [CircleCI](https://circleci.com/gh/macpie/elb)
+
+[![](https://img.shields.io/badge/Erlang-19-brightgreen.svg)](https://hub.docker.com/_/erlang/)
+[![](https://img.shields.io/badge/Erlang-20-brightgreen.svg)](https://hub.docker.com/_/erlang/)
+
+[![](https://img.shields.io/badge/Test-dialyzer-brightgreen.svg)]()
+[![](https://img.shields.io/badge/Test-xref-brightgreen.svg)]()
+[![](https://img.shields.io/badge/Test-eunit-brightgreen.svg)]()
+[![](https://img.shields.io/badge/Test-ct-brightgreen.svg)]()
