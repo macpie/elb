@@ -32,6 +32,14 @@ jobs:
       - run:
           name: Eunit
           command: rebar3 eunit
+  xref:
+    docker:
+      - image: erlang:19
+    steps:
+      - checkout
+      - run:
+          name: Xref
+          command: rebar3 xref
 workflows:
   version: 2
   tests:
