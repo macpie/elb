@@ -1,4 +1,4 @@
--module(elb_SUITE).
+-module(elb_msg_SUITE).
 
 -include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
@@ -11,9 +11,9 @@
 ]).
 
 -export([
-    undef/1
-    ,subscribe/1
-    ,restart/1
+    broadcast/1
+    ,cast/1
+    ,call/1
 ]).
 
 -define(DEFAULT_SIZE, 10).
@@ -39,7 +39,7 @@ all() ->
 %% @end
 %%--------------------------------------------------------------------
 groups() ->
-    [{'elb', [], ['undef', 'subscribe', 'restart']}].
+    [{'elb', [], ['broadcast', 'cast', 'call']}].
 
 %%--------------------------------------------------------------------
 %% @public
@@ -48,7 +48,15 @@ groups() ->
 %% @end
 %%--------------------------------------------------------------------
 init_per_suite(Config) ->
-    Config.
+    {'ok',ELB} = elb:start([
+        {'worker', {?WORKER_NAME, 'start_link'}}
+        ,{'size', ?DEFAULT_SIZE}
+    ]),
+
+    {'ok', Workers} = elb:get_workers(ELB),
+    ?assertEqual(erlang:length(Workers), ?DEFAULT_SIZE),
+
+    [{'elb', ELB} | Config].
 
 %%--------------------------------------------------------------------
 %% @public
@@ -57,7 +65,10 @@ init_per_suite(Config) ->
 %% @end
 %%--------------------------------------------------------------------
 init_per_testcase(_TestCase, Config) ->
-    Config.
+    ELB = proplists:get_value('elb', Config),
+    {'ok', Workers} = elb:get_workers(ELB),
+    'ok' = trace_receive(Workers, ['receive']),
+    [{'workers', ELB} | Config].
 
 %%--------------------------------------------------------------------
 %% @public
@@ -65,7 +76,9 @@ init_per_testcase(_TestCase, Config) ->
 %%   Special end config for test case
 %% @end
 %%--------------------------------------------------------------------
-end_per_testcase(_TestCase, _Config) ->
+end_per_testcase(_TestCase, Config) ->
+    Workers = proplists:get_value('workers', Config),
+    'ok' = untrace_receive(Workers, ['receive']),
     'ok'.
 
 %%--------------------------------------------------------------------
@@ -74,7 +87,9 @@ end_per_testcase(_TestCase, _Config) ->
 %%   Special end config for suite
 %% @end
 %%--------------------------------------------------------------------
-end_per_suite(_Config) ->
+end_per_suite(Config) ->
+    ELB = proplists:get_value('elb', Config),
+    elb:stop(ELB),
     'ok'.
 
 %%--------------------------------------------------------------------
@@ -86,82 +101,53 @@ end_per_suite(_Config) ->
 %% @doc
 %% @end
 %%--------------------------------------------------------------------
-undef(_Config) ->
-    {'ok', ELB} = elb:start_link([]),
-
-    ?assertEqual({'error', 'empty'}, elb:call(ELB, "Fail")),
-    elb:stop(ELB).
-
-%%--------------------------------------------------------------------
-%% @public
-%% @doc
-%% @end
-%%--------------------------------------------------------------------
-subscribe(_Config) ->
-    {'ok', ELB} = elb:start_link([]),
-
-    Cast = "CAST",
-    CastPid = cast_loop(Cast),
-    ?assertEqual('ok', elb:subscribe(ELB, CastPid)),
-    ?assertEqual('ok', elb:cast(ELB, Cast)),
-    ?assertEqual('ok', elb:unsubscribe(ELB, CastPid)),
-
-    Call = "Call",
-    CallPid = call_loop(Call),
-    ?assertEqual('ok', elb:subscribe(ELB, CallPid)),
-    ?assertEqual('ok', elb:call(ELB, Call)),
-    ?assertEqual('ok', elb:unsubscribe(ELB, CallPid)),
-
-    CastPid1 = cast_loop(Cast),
-    CastPid2 = cast_loop(Cast),
-    ?assertEqual('ok', elb:subscribe(ELB, CastPid1)),
-    ?assertEqual('ok', elb:subscribe(ELB, CastPid2)),
-    ?assertEqual('ok', elb:broadcast(ELB, Cast)),
-    ?assertEqual('ok', elb:unsubscribe(ELB, CastPid1)),
-    ?assertEqual('ok', elb:unsubscribe(ELB, CastPid2)),
-
-    elb:stop(ELB).
+broadcast(Config) ->
+    ELB = proplists:get_value('elb', Config),
+    Message = "BROADCAST",
+    elb:broadcast(ELB, Message),
+    ?assert(rcv_loop(?DEFAULT_SIZE, Message)).
 
 %%--------------------------------------------------------------------
 %% @public
 %% @doc
 %% @end
 %%--------------------------------------------------------------------
-restart(_Config) ->
-    {'ok', ELB} = elb:start_link([
-        {'worker', 'worker_test'}
-        ,{'size', 1}
-        ,{'restart', true}
-    ]),
+cast(Config) ->
+    ELB = proplists:get_value('elb', Config),
+    Message = "CAST",
+    elb:cast(ELB, Message),
+    ?assert(rcv_loop(1, Message)).
 
-    {'ok', [Pid|[]]} = elb:get_workers(ELB),
-    ?assertEqual('ok', elb:call(ELB, 'ok')),
-    gen_server:stop(Pid, 'wrong', 100),
-    {'ok', [_Pid|[]]} = elb:get_workers(ELB),
-    ?assertEqual('ok', elb:call(ELB, 'ok')),
+%%--------------------------------------------------------------------
+%% @public
+%% @doc
+%% @end
+%%--------------------------------------------------------------------
+call(Config) ->
+    ELB = proplists:get_value('elb', Config),
+    Message = "CALL",
+    ?assertEqual(elb:call(ELB, Message), Message).
 
-    elb:stop(ELB).
+%% ------------------------------------------------------------------
+%% Internal Function Definitions
+%% ------------------------------------------------------------------
+rcv_loop(0, _Message) -> 'true';
+rcv_loop(Int, Message) ->
+    receive
+        {'trace', _Pid, 'receive', Message} ->
+            rcv_loop(Int-1, Message);
+        _Msg ->
+            rcv_loop(Int, Message)
+    after 1000 ->
+        'false'
+    end.
 
-cast_loop(Expected) ->
-    erlang:spawn(
-        fun() ->
-            receive
-                Msg -> ?assertEqual(Expected, Msg)
-            after 1000 ->
-                ct:fail("timeout")
-            end
-        end
-    ).
+trace_receive([], _Types) -> 'ok';
+trace_receive([Pid|Pids], Types) ->
+    _ = erlang:trace(Pid, 'true', Types),
+    trace_receive(Pids, Types).
 
-call_loop(Expected) ->
-    erlang:spawn(
-        fun() ->
-            receive
-                {Msg, From} ->
-                    ?assertEqual(Expected, Msg),
-                    elb:reply(From, 'ok')
-            after 1000 ->
-                ct:fail("timeout")
-            end
-        end
-    ).
+untrace_receive([], _Types) -> 'ok';
+untrace_receive([Pid|Pids], Types) ->
+    _ = erlang:trace(Pid, 'false', Types),
+    untrace_receive(Pids, Types).
