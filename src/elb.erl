@@ -147,22 +147,24 @@ reply(From, Message) ->
 init(Args) ->
     process_flag('trap_exit', 'true'),
 
-    Worker = proplists:get_value('worker', Args),
+    Worker = proplists:get_value('worker', Args, 'undefined'),
     WorkerArgs = proplists:get_value('worker_args', Args, []),
     Size = proplists:get_value('size', Args, 0),
     Restart = proplists:get_value('restart', Args, 'false'),
 
-    CreateWorker = fun() -> start_worker(Worker, WorkerArgs) end,
-    Workers = [CreateWorker() || _ <- lists:seq(1, Size)],
-
-    State = #state{
+    Workers = case Worker of
+        'undefined' -> [];
+        _ ->
+            CreateWorker = fun() -> start_worker(Worker, WorkerArgs) end,
+            [CreateWorker() || _ <- lists:seq(1, Size)]
+    end,
+    {'ok', #state{
         worker=Worker
         ,worker_args=WorkerArgs
         ,size=Size
         ,workers=Workers
         ,restart=Restart
-    },
-    {'ok', State}.
+    }}.
 
 handle_call({'call', _Message}, _From, #state{workers=[]}=State) ->
     {'reply', {'error', 'empty'}, State};
@@ -195,6 +197,11 @@ handle_cast(_Msg, State) ->
     {'noreply', State}.
 
 handle_info({'EXIT', Pid, 'normal'}, #state{workers=Tail}=State) ->
+    Workers = lists:delete(Pid, Tail),
+    {'noreply', State#state{workers=Workers}};
+handle_info({'EXIT', Pid, _Reason}, #state{restart='true'
+                                          ,worker='undefined'
+                                          ,workers=Tail}=State) ->
     Workers = lists:delete(Pid, Tail),
     {'noreply', State#state{workers=Workers}};
 handle_info({'EXIT', Pid, _Reason}, #state{restart='true'
