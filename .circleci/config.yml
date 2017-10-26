@@ -47,3 +47,4 @@ workflows:
       - dialyzer
       - ct
       - eunit
+      - xref
