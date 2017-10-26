@@ -1,4 +1,10 @@
-# Erlang Load Balancer [![CircleCI](https://circleci.com/gh/macpie/elb.svg?style=svg)](https://circleci.com/gh/macpie/elb)
+# Erlang Load Balancer
+
+[![CircleCI](https://img.shields.io/circleci/project/github/macpie/elb.svg?label=Build)](https://circleci.com/gh/macpie/elb)
+[![Hex.pm](https://img.shields.io/hexpm/l/elb.svg?label=License)](https://github.com/macpie/elb/blob/master/LICENSE) /
+[![Hex.pm](https://img.shields.io/hexpm/v/elb.svg)](https://hex.pm/packages/elb)
+[![Hex.pm](https://img.shields.io/hexpm/dt/elb.svg?label=Downloads)](https://hex.pm/packages/elb) /
+[![Website](https://img.shields.io/website-Up-Down-brightgreen-red/http/shields.io.svg?label=EDoc)](https://macpie.github.io/elb/)
 
 Simple message load balancer using round robin style.
 
@@ -16,9 +22,6 @@ Start using `elb:start(Options)` or `elb:start_link(Options)`
     ,{'restart', true} % Auto restart dead worker. Default to false
 ]
 ```
-
-## [WIKI](https://github.com/macpie/elb/wiki)
-## [EDOC](https://macpie.github.io/elb/)
 
 ## Examples
 
@@ -125,9 +128,6 @@ terminate(_Reason, _State) ->
 ## Build
 
 Built using [Rebar3](http://www.rebar3.org) / Erlang 19.3.
-
-Available on [Hex.pm](https://hex.pm/packages/elb)
-
 
 ## Test
 
