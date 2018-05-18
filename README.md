@@ -1,5 +1,6 @@
 # Erlang Load Balancer
 
+[![Build Status](https://travis-ci.org/macpie/elb.svg?branch=master)](https://travis-ci.org/macpie/elb)
 [![Hex.pm](https://img.shields.io/hexpm/l/elb.svg?label=License)](https://github.com/macpie/elb/blob/master/LICENSE) /
 [![Hex.pm](https://img.shields.io/hexpm/v/elb.svg)](https://hex.pm/packages/elb)
 [![Hex.pm](https://img.shields.io/hexpm/dt/elb.svg?label=Downloads)](https://hex.pm/packages/elb) /
@@ -131,13 +132,3 @@ terminate(_Reason, _State) ->
 ## Test
 
 `rebar3 ct -v`
-
-### Tested via [CircleCI](https://circleci.com/gh/macpie/elb)
-
-[![](https://img.shields.io/badge/Erlang-19-brightgreen.svg)](https://hub.docker.com/_/erlang/)
-[![](https://img.shields.io/badge/Erlang-20-brightgreen.svg)](https://hub.docker.com/_/erlang/)
-
-[![](https://img.shields.io/badge/Test-dialyzer-brightgreen.svg)]()
-[![](https://img.shields.io/badge/Test-xref-brightgreen.svg)]()
-[![](https://img.shields.io/badge/Test-eunit-brightgreen.svg)]()
-[![](https://img.shields.io/badge/Test-ct-brightgreen.svg)]()
