@@ -1,6 +1,5 @@
 # Erlang Load Balancer
 
-[![CircleCI](https://img.shields.io/circleci/project/github/macpie/elb.svg?label=Build)](https://circleci.com/gh/macpie/elb)
 [![Hex.pm](https://img.shields.io/hexpm/l/elb.svg?label=License)](https://github.com/macpie/elb/blob/master/LICENSE) /
 [![Hex.pm](https://img.shields.io/hexpm/v/elb.svg)](https://hex.pm/packages/elb)
 [![Hex.pm](https://img.shields.io/hexpm/dt/elb.svg?label=Downloads)](https://hex.pm/packages/elb) /
